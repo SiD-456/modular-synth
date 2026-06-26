@@ -40,6 +40,15 @@ class AudioNode {
         virtual int maxInputs() const = 0;
         virtual int minOutputs() const = 0;
         virtual int maxOutputs() const = 0;
+        int id;
+
+        void setId(int id){
+            this-> id = id;
+        }
+
+        int getId(){
+            return this->id;
+        }
 
         bool addInput(AudioNode* node){
             if(inputNodes.size() >= maxInputs()){
@@ -255,3 +264,89 @@ class OutputNode : public AudioNode {
         }
 };
 
+class AudioGraph {
+    private: 
+        vector <unique_ptr<AudioNode>> audioNodes;
+        int nextId = 0;
+        vector<int> topologicalOrder;
+        
+
+    public:
+        int addNode(unique_ptr<AudioNode> node){
+            node->setId(++this->nextId);
+            int id = node->getId();
+            audioNodes.push_back(move(node));  
+            return id;
+        }
+
+        AudioNode* getNodeById(int id){
+            for(int i = 0; i < audioNodes.size(); i++){
+                if(audioNodes[i] -> getId() == id){
+                    AudioNode* node = audioNodes[i].get();
+                    return node;
+                }
+            }
+            return nullptr;
+        }
+
+        bool removeNode(int id){
+            for(int i = 0; i < audioNodes.size(); i++){
+                if(audioNodes[i] -> getId() == id){
+                    for (auto* input : audioNodes[i]->inputNodes){
+                        input->removeOutput(audioNodes[i].get());
+                    }
+
+                    for (auto* output : audioNodes[i]->outputNodes){
+                        output->removeInput(audioNodes[i].get());
+                    }
+                    audioNodes.erase(audioNodes.begin() + i);
+                    topologicalSort();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void connectNodes(int id1, int id2){
+            AudioNode* node1 = getNodeById(id1);
+            AudioNode* node2 = getNodeById(id2);
+            node1->addOutput(node2);
+            node2->addInput(node1);
+            topologicalSort();
+        }
+
+        void disconnectNodes(int id1, int id2){
+            AudioNode* node1 = getNodeById(id1);
+            AudioNode* node2 = getNodeById(id2);
+            node1->removeOutput(node2);
+            node2->removeInput(node1);
+        }
+
+        void topologicalSort(){
+            topologicalOrder.clear();
+            queue <int> q;
+            map<int, int> indegrees;
+            for(int i = 0; i < audioNodes.size(); i++){
+                indegrees[audioNodes[i]->getId()] = audioNodes[i]->inputNodes.size();
+            }
+
+            for(auto & [id, indegree] : indegrees){
+                if(indegree == 0){
+                    q.push(id);
+                }
+            }
+
+            while(q.size() > 0){
+                AudioNode* currentNode = getNodeById(q.front());
+                for(AudioNode* node: currentNode->outputNodes){
+                    indegrees[node->getId()]--;
+                    if(indegrees[node->getId()] == 0){
+                        q.push(node->id);
+                    }
+                }
+                topologicalOrder.push_back(q.front());
+                q.pop();
+            }
+        }
+
+};
