@@ -114,8 +114,7 @@ class AudioNode {
 
 };
 
-class OscNode : public AudioNode {
-    // A wave table oscillator
+class OscillatorNode : public AudioNode {
     private:
         float phase = 0.0f;
         float phaseInc = 0.0f;
@@ -129,7 +128,7 @@ class OscNode : public AudioNode {
         int minOutputs() const override {return 0;}
         int maxOutputs() const override {return 1;}
 
-        OscNode(WaveTable* wt) : table(wt) {
+        OscillatorNode(WaveTable* wt) : table(wt) {
             updatePhaseInc();
         }
 
@@ -255,12 +254,8 @@ class OutputNode : public AudioNode {
             }
         }
 
-        float* getBuffer(){
-            return outputBuffer.data();
-        }
-
-        int getBufferSize(){
-            return outputBuffer.size();
+        const vector<float>& getBuffer () {
+            return outputBuffer;
         }
 };
 
@@ -269,10 +264,15 @@ class AudioGraph {
         vector <unique_ptr<AudioNode>> audioNodes;
         int nextId = 0;
         vector<int> topologicalOrder;
+        OutputNode* outputNode = nullptr;
         
 
     public:
         int addNode(unique_ptr<AudioNode> node){
+            if (auto* out = dynamic_cast<OutputNode*>(node.get())) {
+            outputNode = out;
+            }
+
             node->setId(++this->nextId);
             int id = node->getId();
             audioNodes.push_back(move(node));  
@@ -349,4 +349,81 @@ class AudioGraph {
             }
         }
 
+        vector <float> processBuffer(){
+            for(int nodeId : topologicalOrder){
+                AudioNode* node = getNodeById(nodeId);
+                node->process();
+            }
+
+            return this->outputNode->getBuffer();
+        }
 };
+
+void writeWav(const string &fileName, const vector<float> &samples, int sampleRate)
+{
+    ofstream file(fileName, ios::binary);
+
+    int numSamples = samples.size();
+    int dataSize = numSamples * sizeof(int16_t);
+
+    file.write("RIFF", 4);
+    int chunkSize = 36 + dataSize;
+    file.write(reinterpret_cast<char *>(&chunkSize), 4);
+
+    file.write("WAVE", 4);
+    file.write("fmt ", 4);
+    int subchunk1Size = 16;
+    short audioFormat = 1; // PCM
+    short numChannels = 1;
+    int byteRate = sampleRate * numChannels * sizeof(int16_t);
+    short blockAlign = numChannels * sizeof(int16_t);
+    short bitsPerSample = 16;
+
+    file.write(reinterpret_cast<char *>(&subchunk1Size), 4);
+    file.write(reinterpret_cast<char *>(&audioFormat), 2);
+    file.write(reinterpret_cast<char *>(&numChannels), 2);
+    file.write(reinterpret_cast<char *>(&sampleRate), 4);
+    file.write(reinterpret_cast<char *>(&byteRate), 4);
+    file.write(reinterpret_cast<char *>(&blockAlign), 2);
+    file.write(reinterpret_cast<char *>(&bitsPerSample), 2);
+
+    file.write("data", 4);
+    file.write(reinterpret_cast<char *>(&dataSize), 4);
+
+    for (float sample : samples)
+    {
+        int16_t pcm = (int16_t)(sample * 32767.0f);
+        file.write(reinterpret_cast<char *>(&pcm), sizeof(int16_t));
+    }
+
+    file.close();
+}
+
+int main() {
+    AudioGraph graph;
+    SineWaveTable swt(512);
+    int osc = graph.addNode(make_unique<OscillatorNode>(&swt));
+    int out = graph.addNode(make_unique<OutputNode>());
+
+    graph.connectNodes(osc, out);
+
+    int time = 3;
+    int sampleRate = 44100;
+
+    int totalSamples = time * sampleRate;
+    int numChunks = (totalSamples + CHUNKSIZE - 1) / CHUNKSIZE;
+
+    vector<float> data;
+    data.reserve(totalSamples);
+
+    for (int i = 0; i < numChunks; i++) {
+        auto buffer = graph.processBuffer();
+        data.insert(data.end(), buffer.begin(), buffer.end());
+    }
+
+    data.resize(totalSamples);
+
+    writeWav("ModularSine.wav", data, sampleRate);
+
+    return 0;
+}
