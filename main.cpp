@@ -120,7 +120,7 @@ class OscillatorNode : public AudioNode {
         float phaseInc = 0.0f;
         float frequency = 440.0f;
         int sampleRate = 44100;
-        WaveTable* table;
+        const WaveTable* table;
 
     public :
         int minInputs() const override {return 0;}
@@ -128,7 +128,7 @@ class OscillatorNode : public AudioNode {
         int minOutputs() const override {return 0;}
         int maxOutputs() const override {return 1;}
 
-        OscillatorNode(WaveTable* wt) : table(wt) {
+        OscillatorNode(const WaveTable* wt) : table(wt){
             updatePhaseInc();
         }
 
@@ -268,14 +268,34 @@ class AudioGraph {
         
 
     public:
-        int addNode(unique_ptr<AudioNode> node){
-            if (auto* out = dynamic_cast<OutputNode*>(node.get())) {
-            outputNode = out;
+        unique_ptr<WaveTable> table;
+
+        AudioGraph(){
+            table = make_unique<SineWaveTable>(1024);
+        }
+
+        int addNode(string nodeType){
+            unique_ptr<AudioNode> node;
+            if(nodeType == "OscillatorNode"){
+                node = make_unique<OscillatorNode>(table.get());
+            }
+            else if(nodeType == "GainNode"){
+                node = make_unique<GainNode>();
+            }
+            else if(nodeType == "MixerNode"){
+                node = make_unique<MixerNode>();
+            }
+            else if(nodeType == "OutputNode"){
+                node = make_unique<OutputNode>();
+                outputNode = dynamic_cast<OutputNode*> (node.get());
+            }
+            else{
+                throw runtime_error("Unknown Node Type");
             }
 
             node->setId(++this->nextId);
             int id = node->getId();
-            audioNodes.push_back(move(node));  
+            audioNodes.push_back(move(node));
             return id;
         }
 
@@ -401,9 +421,8 @@ void writeWav(const string &fileName, const vector<float> &samples, int sampleRa
 
 int main() {
     AudioGraph graph;
-    SineWaveTable swt(512);
-    int osc = graph.addNode(make_unique<OscillatorNode>(&swt));
-    int out = graph.addNode(make_unique<OutputNode>());
+    int osc = graph.addNode("OscillatorNode");
+    int out = graph.addNode("OutputNode");
 
     graph.connectNodes(osc, out);
 
