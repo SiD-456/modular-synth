@@ -1,2 +1,0 @@
-constructor bindings in emscripten
-lambda functions cpp
