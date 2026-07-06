@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AudioGraph WASM Console Test</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+  code, pre { background: #f2f2f2; padding: 0.2rem 0.4rem; border-radius: 4px; }
+  pre { padding: 1rem; overflow-x: auto; }
+  #status { font-weight: bold; }
+</style>
+</head>
+<body>
+  <h1>AudioGraph WASM test harness</h1>
+  <p id="status">Loading module...</p>
+
+  <p>Once loaded, open the browser console. A ready-made <code>graph</code> instance
+  and the raw <code>Module</code> are both attached to <code>window</code>, so you can
+  poke at the API directly:</p>
+
+  <pre id="snippet">
+// already created for you on load:
+graph                       // an AudioGraph instance
+osc                         // an OscillatorNode* (from graph.addNode)
+out                         // an OutputNode*
+
+osc.setFrequency(220);
+osc.setSampleRate(44100);
+graph.connectNodes(osc, out);
+
+const buf = graph.processBuffer(); // one CHUNKSIZE-length Float array
+console.log(buf.length, buf.slice(0, 10));
+
+// or build your own graph from scratch:
+const g2 = new Module.AudioGraph();
+const o2 = g2.addNode("OscillatorNode");
+const gain = g2.addNode("GainNode");
+const out2 = g2.addNode("OutputNode");
+g2.connectNodes(o2, gain);
+g2.connectNodes(gain, out2);
+o2.setFrequency(440);
+gain.setGainControl(0.5);
+g2.processBuffer();
+  </pre>
+
+  <script src="audio_module.js"></script>
+  <script>
+    // MODULARIZE=1 in the build makes createAudioModule a factory function
+    // that resolves to the initialized Module.
+    createAudioModule().then((Module) => {
+      window.Module = Module;
+
+      // Stand up one graph automatically so the console has something to
+      // poke at immediately.
+      const graph = new Module.AudioGraph();
+      const osc = graph.addNode("OscillatorNode"); // returns an OscillatorNode in JS, not a bare AudioNode
+      const out = graph.addNode("OutputNode");
+
+      window.graph = graph;
+      window.osc = osc;
+      window.out = out;
+
+      document.getElementById('status').textContent =
+        'Module loaded. graph / osc / out are on window -- open the console.';
+
+      console.log('AudioGraph module ready.');
+      console.log('osc instanceof:', osc.constructor.name); // should read OscillatorNode, not AudioNode
+      console.log('Try: osc.setFrequency(220); graph.connectNodes(osc, out); graph.processBuffer();');
+    }).catch((err) => {
+      document.getElementById('status').textContent = 'Failed to load module -- see console.';
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
