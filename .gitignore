@@ -1,4 +1,3 @@
 emsdk/ 
+build/
 todo.txt
-audio_module.js
-audio_module.wasm
