@@ -4,7 +4,6 @@
 
 constexpr double PI = 3.14159265358979323846;
 
-// ---------------- SineWaveTable ----------------
 
 SineWaveTable::SineWaveTable(int size) {
     this->size = size;
@@ -18,7 +17,6 @@ void SineWaveTable::constructWaveTable() {
     }
 }
 
-// ---------------- AudioNode ----------------
 
 void AudioNode::setId(int id) {
     this->id = id;
@@ -79,7 +77,6 @@ bool AudioNode::removeOutput(AudioNode* node) {
     }
 }
 
-// ---------------- OscillatorNode ----------------
 
 OscillatorNode::OscillatorNode(const WaveTable* wt) : table(wt) {
     updatePhaseInc();
@@ -129,7 +126,6 @@ void OscillatorNode::process() {
     }
 }
 
-// ---------------- GainNode ----------------
 
 void GainNode::setGainControl(float gainControl) {
     this->gainControl = gainControl;
@@ -143,7 +139,6 @@ void GainNode::process() {
     }
 }
 
-// ---------------- MixerNode ----------------
 
 void MixerNode::onInputAdded() {
     mixerAmplitudes.push_back(1.0f);
@@ -177,7 +172,6 @@ void MixerNode::process() {
     }
 }
 
-// ---------------- OutputNode ----------------
 
 void OutputNode::process() {
     outputBuffer.resize(chunkSize);

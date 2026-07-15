@@ -1,1 +1,1 @@
-emcc engine/graph.cpp engine/nodes.cpp engine/bindings.cpp -std=c++17 --bind -s MODULARIZE=1 -s EXPORT_NAME="createAudioModule" -s ALLOW_MEMORY_GROWTH=1 -O2 -o build/audio_module.js
+emcc engine/graph.cpp engine/nodes.cpp engine/bindings.cpp -std=c++17 --bind -s MODULARIZE=1 -s EXPORT_ES6=1 -s EXPORT_NAME="createAudioModule" -s ALLOW_MEMORY_GROWTH=1 -O2 -o frontend/src/modules/audio_module.js
