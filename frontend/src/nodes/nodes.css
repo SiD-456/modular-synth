@@ -1,0 +1,11 @@
+.audioNode {
+    color: white;
+    background-color: blueviolet;
+    padding-inline: 20px;
+    padding-block: 10px;
+    border-radius: 20px;
+    text-align: center;
+    border-color: white;
+    border-width: 3px;
+    border-style:solid;
+}

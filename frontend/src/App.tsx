@@ -6,59 +6,49 @@ import Canvas from './Canvas.tsx'
 import OscillatorNode from './nodes/Oscillator.tsx';
 import GainNode from './nodes/Gain.tsx';
 import OutputNode from './nodes/Output.tsx';
-import { ReactFlow, useEdgesState, useNodesState } from '@xyflow/react';
+import { useEdgesState, useNodesState } from '@xyflow/react';
 import type { Node, Edge } from "@xyflow/react"
-import { useEffect, useRef } from "react";
-import createAudioModule from "./modules/audio_module.js";
 
 const nodeTypes = {
-    OscillatorNode: OscillatorNode,
-    GainNode: GainNode,
-    OutputNode: OutputNode
-  }
+  OscillatorNode: OscillatorNode,
+  GainNode: GainNode,
+  OutputNode: OutputNode
+}
 
-function App() {
+const nodeList = [
+  "OscillatorNode",
+  "GainNode",
+  "OutputNode"
+]
 
-  const nodeList = [
-    "OscillatorNode",
-    "GainNode",
-    "OutputNode"
-  ]
-  
+function App({ engine }: any) {
+
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const onPlayPause = () => {
-    setIsPlaying(!isPlaying);
+  const onPlayPause = async () => {
+    const nextState = !isPlaying;
+    setIsPlaying(nextState);
+
+    if (nextState) {
+        await engine.play();
+    } else {
+        engine.pause();
+    }
   }
 
-  const graphRef = useRef<any>(null);
-
-  useEffect(() => {
-    async function init() {
-      const engine = await createAudioModule();
-      graphRef.current = new engine.AudioGraph;
-    }
-
-    init();
-  }, [])
-
-  function createNode(node: string) {
+  async function createNode(node: string) {
+    const nodeId = await engine.addNode(node);
     const newNode = {
       id: crypto.randomUUID(),
       type: node,
-      position: {x: 100, y: 100},
-      data: {}
-    }
+      position: { x: 100, y: 100 + nodes.length * 110 },
+      data: { nodeId }
+    };
 
-    setNodes((nodes)=>{
-      return [...nodes, newNode];
-    })
-
-    const cppNode = graphRef.current.addNode(node);
-    console.log(cppNode);
+    setNodes(nodes => [...nodes, newNode]);
   }
 
   return (<>
@@ -71,6 +61,7 @@ function App() {
         createNode={createNode}
       />
       <Canvas
+        engine = {engine}
         nodes={nodes}
         edges={edges}
         setNodes={setNodes}

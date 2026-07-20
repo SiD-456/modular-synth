@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#define CHUNKSIZE 512
+#define CHUNKSIZE 128
 
 class WaveTable {
     public:
@@ -106,4 +106,4 @@ class OutputNode : public AudioNode {
         const std::vector<float>& getBuffer();
 };
 
-#endif // NODES_H
+#endif

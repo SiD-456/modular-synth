@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include "nodes.h"
+#include <iostream>
 
 class AudioGraph {
     private:

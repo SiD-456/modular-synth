@@ -1,6 +1,9 @@
 import { Handle, Position } from "@xyflow/react"
+import "./nodes.css"
+
 type OutputNodeProps = {
     data: {
+        cppNode: any;
         level: number;
     };
 }
@@ -8,10 +11,10 @@ type OutputNodeProps = {
 
 function OutputNode({data}: OutputNodeProps) {
     return(<>
-    <div>
+    <div className = "audioNode">
         <Handle type = "target" position = {Position.Left}></Handle>
         <h4>Output</h4>
-        <p>Frequency : {data.level} dB</p>
+        <p>On</p>
     </div>
     </>)
 }

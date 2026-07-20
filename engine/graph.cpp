@@ -2,6 +2,22 @@
 #include <fstream>
 #include <queue>
 #include <map>
+#include <cstdio>
+#include <cstdarg>
+
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#else
+#define EM_LOG_CONSOLE 0
+inline void emscripten_log(int, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    printf("\n");
+    va_end(args);
+}
+#endif
 
 AudioGraph::AudioGraph() {
     swt = std::make_unique<SineWaveTable>(1024);
@@ -100,7 +116,9 @@ std::vector<float> AudioGraph::processBuffer() {
         AudioNode* node = getNodeById(nodeId);
         node->process();
     }
-
+    const int mysize = this->outputNode->getBuffer().size();
+    //emscripten_log(EM_LOG_CONSOLE, "Buffer size: %d", mysize);
+    
     return this->outputNode->getBuffer();
 }
 
