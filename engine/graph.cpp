@@ -26,7 +26,7 @@ AudioGraph::AudioGraph() {
 AudioNode* AudioGraph::addNode(std::string nodeType) {
     std::unique_ptr<AudioNode> node;
     if (nodeType == "OscillatorNode") {
-        node = std::make_unique<OscillatorNode>(swt.get());
+        node = std::make_unique<OscillatorNode>(this, swt.get());
     } else if (nodeType == "GainNode") {
         node = std::make_unique<GainNode>();
     } else if (nodeType == "MixerNode") {
@@ -52,6 +52,10 @@ AudioNode* AudioGraph::getNodeById(int id) {
         }
     }
     return nullptr;
+}
+
+int AudioGraph::getSampleRate(){
+    return this->sampleRate;
 }
 
 bool AudioGraph::removeNode(int id) {

@@ -46,16 +46,43 @@ class Engine {
         return this.call({ type: "connect", srcId, dstId });
     }
 
-    async play(){
+    async play() {
         if (this.context.state === "suspended") {
-        await this.context.resume();
+            await this.context.resume();
         }
-        this.worklet.port.postMessage({type: "play"});
+        this.worklet.port.postMessage({ type: "play" });
     }
 
-    pause(){
+    pause() {
+        this.worklet.port.postMessage({ type: "pause" });
+    }
 
-        this.worklet.port.postMessage({type: "pause"});
+    async getFrequency(nodeId: number) {
+        return this.call({ type: "getFrequency", nodeId })
+    }
+
+    async setFrequency(nodeId: number, frequency: number) {
+        return this.call({ type: "setFrequency", nodeId, frequency })
+    }
+
+    async getGain(nodeId: number) {
+        return this.call({ type: "getGain", nodeId })
+    }
+
+    async setGain(nodeId: number, gain: number) {
+        return this.call({ type: "setGain", nodeId, gain })
+    }
+    async updateAmplitude(
+        mixerNodeId: number,
+        inputNodeId: number,
+        amplitude: number
+    ) {
+        return this.call({
+            type: "updateAmplitude",
+            mixerNodeId,
+            inputNodeId,
+            amplitude,
+        });
     }
 }
 

@@ -16,9 +16,10 @@ class AudioGraph {
 
     public:
         std::unique_ptr<WaveTable> swt;
+        int sampleRate = 44100;
 
         AudioGraph();
-
+        int getSampleRate();
         AudioNode* addNode(std::string nodeType);
         AudioNode* getNodeById(int id);
         bool removeNode(int id);

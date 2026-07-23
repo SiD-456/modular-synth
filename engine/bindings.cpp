@@ -22,12 +22,13 @@ EMSCRIPTEN_BINDINGS(audio_graph_module) {
 
     class_<OscillatorNode, base<AudioNode>>("OscillatorNode")
         .function("setFrequency", &OscillatorNode::setFrequency)
-        .function("setSampleRate", &OscillatorNode::setSampleRate)
+        .function("getFrequency", &OscillatorNode::getFrequency)
         .function("process", &OscillatorNode::process)
         ;
     
     class_<GainNode, base<AudioNode>>("GainNode")
         .function("setGainControl", &GainNode::setGainControl)
+        .function("getGainControl", &GainNode::getGainControl)
         .function("process", &GainNode::process)
         ;
 

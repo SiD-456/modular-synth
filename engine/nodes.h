@@ -2,8 +2,8 @@
 #define NODES_H
 
 #include <vector>
-
 #define CHUNKSIZE 128
+class AudioGraph;
 
 class WaveTable {
     public:
@@ -59,31 +59,33 @@ class OscillatorNode : public AudioNode {
         int minOutputs() const override {return 0;}
         int maxOutputs() const override {return 1;}
 
-        OscillatorNode(const WaveTable* wt);
+        OscillatorNode(const AudioGraph* graph, const WaveTable* wt);
 
         void changeWaveTable(WaveTable* wt);
         void updatePhaseInc();
         void setSampleRate(int sampleRate);
         void setFrequency(float frequency);
+        float getFrequency();
         void incrementPhase();
         void process() override;
 };
 
 class GainNode : public AudioNode {
     public:
-        int minInputs() const override {return 1;}
+        int minInputs() const override {return 0;}
         int maxInputs() const override {return 1;}
         int minOutputs() const override {return 0;}
         int maxOutputs() const override {return 1;}
         float gainControl = 1.0f;
 
         void setGainControl(float gainControl);
+        float getGainControl();
         void process() override;
 };
 
 class MixerNode : public AudioNode {
     public:
-        int minInputs() const override {return 1;}
+        int minInputs() const override {return 0;}
         int maxInputs() const override {return 3;}
         int minOutputs() const override {return 0;}
         int maxOutputs() const override {return 1;}
@@ -97,7 +99,7 @@ class MixerNode : public AudioNode {
 
 class OutputNode : public AudioNode {
     public:
-        int minInputs() const override {return 1;}
+        int minInputs() const override {return 0;}
         int maxInputs() const override {return 1;}
         int minOutputs() const override {return 0;}
         int maxOutputs() const override {return 0;}

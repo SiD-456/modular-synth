@@ -1,4 +1,5 @@
 #include "nodes.h"
+#include "graph.h"
 #include <cmath>
 #include <algorithm>
 
@@ -78,8 +79,9 @@ bool AudioNode::removeOutput(AudioNode* node) {
 }
 
 
-OscillatorNode::OscillatorNode(const WaveTable* wt) : table(wt) {
+OscillatorNode::OscillatorNode(const AudioGraph* graph, const WaveTable* wt) : table(wt) {
     updatePhaseInc();
+    setSampleRate(graph->sampleRate);
 }
 
 void OscillatorNode::changeWaveTable(WaveTable* wt) {
@@ -99,6 +101,10 @@ void OscillatorNode::setSampleRate(int sampleRate) {
 void OscillatorNode::setFrequency(float frequency) {
     this->frequency = frequency;
     updatePhaseInc();
+}
+
+float OscillatorNode::getFrequency(){
+    return this->frequency;
 }
 
 void OscillatorNode::incrementPhase() {
@@ -129,6 +135,10 @@ void OscillatorNode::process() {
 
 void GainNode::setGainControl(float gainControl) {
     this->gainControl = gainControl;
+}
+
+float GainNode::getGainControl(){
+    return this->gainControl;
 }
 
 void GainNode::process() {

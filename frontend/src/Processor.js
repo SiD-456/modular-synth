@@ -41,10 +41,12 @@ class AudioProcessor extends AudioWorkletProcessor {
             case "connect": {
                 const sourceNode = this.graph.getNodeById(msg.srcId);
                 const destNode = this.graph.getNodeById(msg.dstId);
+                //console.log(sourceNode, destNode);
                 this.graph.connectNodes(sourceNode, destNode);
                 this.port.postMessage({ requestId: msg.requestId, result: null });
                 break;
             }
+
             case "play": {
                 //console.log("started playing");
                 this.isPlaying = true;
@@ -52,17 +54,57 @@ class AudioProcessor extends AudioWorkletProcessor {
             }
             case "pause": {
                 this.isPlaying = false;
+                break;
+            }
+            case "getFrequency": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                //console.log(node);
+                const frequency = node.getFrequency();
+                this.port.postMessage({ requestId: msg.requestId, result: frequency });
+                break;
+            }
+            case "setFrequency": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                node.setFrequency(msg.frequency);
+                console.log(msg.frequency);
+                this.port.postMessage({ requestId: msg.requestId, result: msg.frequency });
+                break;
+            }
+            case "getGain": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                const gain = node.getGainControl();
+                this.port.postMessage({ requestId: msg.requestId, result: gain });
+                break;
+            }
+            case "setGain": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                node.setGainControl(msg.gain);
+                console.log(msg.gain);
+                this.port.postMessage({ requestId: msg.requestId, result: msg.gain });
+                break;
+            }
+            case "updateAmplitude": {
+                const mixer = this.graph.getNodeById(msg.mixerNodeId);
+                const input = this.graph.getNodeById(msg.inputNodeId);
+
+                mixer.updateAmplitude(input, msg.amplitude);
+
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: msg.amplitude,
+                });
+                break;
             }
         }
     }
 
     process(inputs, outputs) {
         if (!this.ready || !this.isPlaying) {
-            return true; 
+            return true;
         }
         //console.log("playing audio");
         const output = outputs[0];
-        const samples = this.graph.processBuffer(); 
+        const samples = this.graph.processBuffer();
 
         for (let ch = 0; ch < output.length; ch++) {
             const channel = output[ch];

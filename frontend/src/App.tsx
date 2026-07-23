@@ -5,6 +5,7 @@ import Sidebar from './Sidebar.tsx'
 import Canvas from './Canvas.tsx'
 import OscillatorNode from './nodes/Oscillator.tsx';
 import GainNode from './nodes/Gain.tsx';
+import MixerNode from './nodes/Mixer.tsx'
 import OutputNode from './nodes/Output.tsx';
 import { useEdgesState, useNodesState } from '@xyflow/react';
 import type { Node, Edge } from "@xyflow/react"
@@ -12,13 +13,15 @@ import type { Node, Edge } from "@xyflow/react"
 const nodeTypes = {
   OscillatorNode: OscillatorNode,
   GainNode: GainNode,
-  OutputNode: OutputNode
+  OutputNode: OutputNode,
+  MixerNode: MixerNode
 }
 
 const nodeList = [
   "OscillatorNode",
   "GainNode",
-  "OutputNode"
+  "OutputNode",
+  "MixerNode",
 ]
 
 function App({ engine }: any) {
@@ -45,7 +48,7 @@ function App({ engine }: any) {
       id: crypto.randomUUID(),
       type: node,
       position: { x: 100, y: 100 + nodes.length * 110 },
-      data: { nodeId }
+      data: { engine, nodeId}
     };
 
     setNodes(nodes => [...nodes, newNode]);
