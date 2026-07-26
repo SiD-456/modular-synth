@@ -5,7 +5,7 @@
 
 constexpr double PI = 3.14159265358979323846;
 
-
+//WaveTable
 SineWaveTable::SineWaveTable(int size) {
     this->size = size;
     constructWaveTable();
@@ -18,7 +18,7 @@ void SineWaveTable::constructWaveTable() {
     }
 }
 
-
+//AudioNode base class
 void AudioNode::setId(int id) {
     this->id = id;
 }
@@ -78,7 +78,7 @@ bool AudioNode::removeOutput(AudioNode* node) {
     }
 }
 
-
+//Oscillator 
 OscillatorNode::OscillatorNode(const AudioGraph* graph, const WaveTable* wt) : table(wt) {
     updatePhaseInc();
     setSampleRate(graph->sampleRate);
@@ -132,7 +132,7 @@ void OscillatorNode::process() {
     }
 }
 
-
+//Gain
 void GainNode::setGainControl(float gainControl) {
     this->gainControl = gainControl;
 }
@@ -149,7 +149,7 @@ void GainNode::process() {
     }
 }
 
-
+//Mixer
 void MixerNode::onInputAdded() {
     mixerAmplitudes.push_back(1.0f);
 }
@@ -182,7 +182,100 @@ void MixerNode::process() {
     }
 }
 
+//ADSR envelope
+ADSRNode::ADSRNode(const AudioGraph* graph){
+    this->sampleRate = graph->sampleRate;
+}
 
+float ADSRNode::getAttack() const{
+    return attackTime;
+}
+
+float ADSRNode::getDecay() const{
+    return decayTime;
+}
+
+float ADSRNode::getSustain() const{
+    return sustainLevel;
+}
+
+float ADSRNode::getRelease() const{
+    return releaseTime;
+}
+
+void ADSRNode::setAttack(float attackTime){
+    this->attackTime = std::max(0.01f, attackTime);
+}
+
+void ADSRNode::setDecay(float decayTime){
+    this->decayTime = std::max(0.01f, decayTime);
+}
+
+void ADSRNode::setSustain(float sustainLevel){
+    this->sustainLevel = std::clamp(sustainLevel, 0.0f, 1.0f);
+}
+
+void ADSRNode::setRelease(float releaseTime){
+    this->releaseTime = std::max(0.01f, releaseTime);
+}
+
+void ADSRNode::updateIncrement(){
+    switch(state){
+        case EnvelopeState::Idle:
+            increment = 0.0f;
+            break;
+        case EnvelopeState::Attack:
+            increment = (1.0f - level)/(attackTime * sampleRate);
+            break;
+        case EnvelopeState::Decay:
+            increment = (sustainLevel - level)/(decayTime * sampleRate);
+            break;
+        case EnvelopeState::Sustain:
+            increment = 0.0f;
+            break;
+        case EnvelopeState::Release:
+            increment = (0.0f - level)/(releaseTime * sampleRate);
+            break;
+    }
+}
+
+void ADSRNode::keyDown(){
+    state = EnvelopeState::Attack;
+    updateIncrement();
+}
+
+void ADSRNode::keyUp(){
+    state = EnvelopeState::Release;
+    updateIncrement();
+}
+
+void ADSRNode::process(){
+    if(inputNodes.empty()) return;
+    float epsilon = 0.0001f;
+    outputBuffer.resize(chunkSize);
+    for(int i = 0; i < chunkSize; i++){
+        if(state == EnvelopeState::Attack && level >= 1){
+            level = 1;
+            state = EnvelopeState::Decay;
+            updateIncrement();
+        }
+        else if(state == EnvelopeState::Decay && (std::abs(level - sustainLevel) <= epsilon || level <= sustainLevel)){
+            level = sustainLevel;
+            state = EnvelopeState::Sustain;
+            updateIncrement();
+        }
+        else if(state == EnvelopeState::Release && (std::abs(level - 0.0f) <= epsilon || level <= 0.0f)){
+            level = 0.0f;
+            state = EnvelopeState::Idle;
+            updateIncrement();
+        }
+        level = std::clamp(level, 0.0f, 1.0f);
+        outputBuffer[i] = inputNodes[0]->outputBuffer[i] * level;
+        level += increment;
+    }
+}
+
+//Output
 void OutputNode::process() {
     outputBuffer.resize(chunkSize);
     for (int i = 0; i < chunkSize; i++) {

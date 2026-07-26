@@ -13,6 +13,7 @@ class AudioGraph {
         int nextId = 0;
         std::vector<int> topologicalOrder;
         OutputNode* outputNode = nullptr;
+        std::vector<OscillatorNode*> sourceNodes;
 
     public:
         std::unique_ptr<WaveTable> swt;

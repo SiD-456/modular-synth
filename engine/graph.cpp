@@ -27,6 +27,7 @@ AudioNode* AudioGraph::addNode(std::string nodeType) {
     std::unique_ptr<AudioNode> node;
     if (nodeType == "OscillatorNode") {
         node = std::make_unique<OscillatorNode>(this, swt.get());
+        sourceNodes.push_back(dynamic_cast<OscillatorNode*>(node.get()));
     } else if (nodeType == "GainNode") {
         node = std::make_unique<GainNode>();
     } else if (nodeType == "MixerNode") {

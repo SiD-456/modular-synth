@@ -3,6 +3,9 @@
 
 #include <vector>
 #define CHUNKSIZE 128
+
+#include <string>
+
 class AudioGraph;
 
 class WaveTable {
@@ -95,6 +98,49 @@ class MixerNode : public AudioNode {
         void onInputRemoved(size_t index) override;
         void updateAmplitude(AudioNode* node, float amplitude);
         void process() override;
+};
+
+class ADSRNode : public AudioNode {
+    public:
+        ADSRNode(const AudioGraph* graph);
+        int minInputs() const override {return 0;}
+        int maxInputs() const override {return 1;}
+        int minOutputs() const override {return 0;}
+        int maxOutputs() const override {return 1;}
+        void process() override;
+        void keyDown();
+        void keyUp();
+        
+        float getAttack() const;
+        float getDecay() const;
+        float getSustain() const;
+        float getRelease() const;
+
+        void setAttack(float attackTime);
+        void setDecay(float decayTime);
+        void setSustain(float sustainLevel);
+        void setRelease(float releaseTime);
+
+    private:
+        enum class EnvelopeState {
+            Idle,
+            Attack,
+            Decay,
+            Sustain,
+            Release
+        };
+
+        EnvelopeState state = EnvelopeState::Idle;
+
+        float attackTime = 0.1f;
+        float decayTime = 0.3f;
+        float sustainLevel = 0.5f;
+        float releaseTime = 0.3f;
+        float level = 0.0f;
+
+        float increment = 0.0f;
+        float sampleRate;
+        void updateIncrement();
 };
 
 class OutputNode : public AudioNode {
