@@ -95,6 +95,103 @@ class AudioProcessor extends AudioWorkletProcessor {
                 });
                 break;
             }
+            case "keyDown": {
+                this.graph.keyDown(msg.frequency);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: null,
+                });
+                break;
+            }
+
+            case "keyUp": {
+                this.graph.keyUp(msg.frequency);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: null,
+                });
+                break;
+            }
+
+            case "getAttack": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                const value = node.getAttack();
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: value,
+                });
+                break;
+            }
+
+            case "setAttack": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                node.setAttack(msg.attack);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: msg.attack,
+                });
+                break;
+            }
+
+            case "getDecay": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                const value = node.getDecay();
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: value,
+                });
+                break;
+            }
+
+            case "setDecay": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                node.setDecay(msg.decay);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: msg.decay,
+                });
+                break;
+            }
+
+            case "getSustain": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                const value = node.getSustain();
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: value,
+                });
+                break;
+            }
+
+            case "setSustain": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                node.setSustain(msg.sustain);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: msg.sustain,
+                });
+                break;
+            }
+
+            case "getRelease": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                const value = node.getRelease();
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: value,
+                });
+                break;
+            }
+
+            case "setRelease": {
+                const node = this.graph.getNodeById(msg.nodeId);
+                node.setRelease(msg.release);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    result: msg.release,
+                });
+                break;
+            }
         }
     }
 

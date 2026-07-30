@@ -84,6 +84,79 @@ class Engine {
             amplitude,
         });
     }
+    async keyDown(frequency: number) {
+        return this.call({
+            type: "keyDown",
+            frequency,
+        });
+    }
+
+    async keyUp(frequency: number) {
+        return this.call({
+            type: "keyUp",
+            frequency,
+        });
+    }
+
+    async getAttack(nodeId: number) {
+        return this.call({
+            type: "getAttack",
+            nodeId,
+        });
+    }
+
+    async setAttack(nodeId: number, attack: number) {
+        return this.call({
+            type: "setAttack",
+            nodeId,
+            attack,
+        });
+    }
+
+    async getDecay(nodeId: number) {
+        return this.call({
+            type: "getDecay",
+            nodeId,
+        });
+    }
+
+    async setDecay(nodeId: number, decay: number) {
+        return this.call({
+            type: "setDecay",
+            nodeId,
+            decay,
+        });
+    }
+
+    async getSustain(nodeId: number) {
+        return this.call({
+            type: "getSustain",
+            nodeId,
+        });
+    }
+
+    async setSustain(nodeId: number, sustain: number) {
+        return this.call({
+            type: "setSustain",
+            nodeId,
+            sustain,
+        });
+    }
+
+    async getRelease(nodeId: number) {
+        return this.call({
+            type: "getRelease",
+            nodeId,
+        });
+    }
+
+    async setRelease(nodeId: number, release: number) {
+        return this.call({
+            type: "setRelease",
+            nodeId,
+            release,
+        });
+    }
 }
 
 export default Engine;
