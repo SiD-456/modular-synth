@@ -1,13 +1,13 @@
 .audioNode {
-    color: white;
-    background-color: blueviolet;
+    color: #ecd9ef;
+    background-color: #241129;
     padding-inline: 20px;
     padding-block: 10px;
-    border-radius: 20px;
+    border-radius: 8px;
     text-align: center;
-    border-color: white;
-    border-width: 3px;
-    border-style:solid;
+    border-color: #a83bb5;
+    border-width: 2px;
+    border-style: solid;
 }
 
 .audioNode .react-flow__handle {
@@ -15,34 +15,12 @@
     height: 16px;
 }
 
-.mixerNode {
-    width: 250px;
-    padding: 10px;
-}
-
-.mixerRow {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-    padding-left: 18px;
-}
-
-.mixerRow label {
-    width: 55px;
-    font-size: 12px;
-}
-
-.mixerRow input {
-    flex: 1;
-}
-
 .gainValue {
     width: 40px;
     text-align: right;
     font-size: 11px;
     font-family: monospace;
+    color: #ecd9ef;
 }
 
 /* Align input handles with each slider */
@@ -73,14 +51,14 @@
     position: relative;
     height: 100%;
     background: #fff;
-    border: 1px solid #999;
+    border: 1px solid #5b2a63;
     border-radius: 0 0 4px 4px;
     box-sizing: border-box;
     cursor: pointer;
 }
 
 .piano-key-white.active {
-    background: #cce4ff;
+    background: #e5c9ea;
 }
 
 .piano-black-keys {
@@ -105,7 +83,7 @@
 }
 
 .piano-key-black.active {
-    background: #4a7fc9;
+    background: #a83bb5;
 }
 
 .piano-key-label {
@@ -120,4 +98,103 @@
 
 .piano-key-black .piano-key-label {
     color: #ccc;
+}
+
+.piano-key-white,
+.piano-key-black {
+    transition:
+        background-color 70ms ease,
+        transform 40ms ease;
+}
+
+.piano-key-white.active {
+    background: #e5c9ea;
+    transform: translateY(2px);
+}
+
+.piano-key-black.active {
+    background: #a83bb5;
+    transform: translateY(2px);
+}
+
+/* ---------- Themed Sliders ---------- */
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #4b2952;
+    border: 1px solid #a83bb5;
+    border-radius: 999px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Chrome / Edge / Safari Track */
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    background: #4b2952;
+    border: 1px solid #a83bb5;
+    border-radius: 999px;
+}
+
+/* Chrome / Edge / Safari Thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ecd9ef;
+    border: 2px solid #a83bb5;
+    margin-top: -6px;
+    transition: 0.15s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #ffffff;
+    transform: scale(1.08);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+    background: #d79ae0;
+    transform: scale(1.15);
+}
+
+/* Firefox Track */
+input[type="range"]::-moz-range-track {
+    height: 6px;
+    background: #4b2952;
+    border: 1px solid #a83bb5;
+    border-radius: 999px;
+}
+
+/* Firefox Thumb */
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ecd9ef;
+    border: 2px solid #a83bb5;
+    transition: 0.15s;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: #ffffff;
+    transform: scale(1.08);
+}
+
+input[type="range"]::-moz-range-thumb:active {
+    background: #d79ae0;
+    transform: scale(1.15);
+}
+
+/* Remove Firefox focus outline */
+input[type="range"]::-moz-focus-outer {
+    border: 0;
+}
+
+input[type="range"]:focus {
+    outline: none;
 }

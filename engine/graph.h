@@ -15,13 +15,14 @@ class AudioGraph {
         OutputNode* outputNode = nullptr;
         std::vector<OscillatorNode*> sourceNodes;
         std::vector<ADSRNode*> adsrNodes;
+        float currFreq = 0.0f;
 
     public:
         std::unique_ptr<WaveTable> swt;
         int sampleRate = 44100;
 
         void keyDown(float freq);
-        void keyUp();
+        void keyUp(float freq);
         AudioGraph();
         int getSampleRate();
         AudioNode* addNode(std::string nodeType);

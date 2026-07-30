@@ -86,9 +86,11 @@ void AudioGraph::keyDown(float freq){
     for(auto node: this->adsrNodes){
         node->keyDown();
     }
+    currFreq = freq;
 }
 
-void AudioGraph::keyUp(){
+void AudioGraph::keyUp(float freq){
+    if(freq != currFreq) return;
     for(auto node: adsrNodes){
         node->keyUp();
     }

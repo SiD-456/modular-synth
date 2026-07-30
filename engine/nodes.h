@@ -55,6 +55,7 @@ class OscillatorNode : public AudioNode {
         float frequency = 440.0f;
         int sampleRate = 44100;
         const WaveTable* table;
+        float level = 0.25f;
 
     public:
         int minInputs() const override {return 0;}

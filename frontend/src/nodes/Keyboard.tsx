@@ -8,13 +8,12 @@ type KeyboardNodeProps = {
 };
 
 type PianoKey = {
-    key: string;      // computer keyboard key
-    label: string;    // note name shown on key
-    offset: number;   // semitones from C4
+    key: string;
+    label: string;
+    offset: number;
     type: "white" | "black";
 };
 
-// 2 octaves, C4 -> C6
 const KEYS: PianoKey[] = [
     { key: "z", label: "C4", offset: 0, type: "white" },
     { key: "s", label: "C#4", offset: 1, type: "black" },
@@ -47,7 +46,7 @@ const KEY_MAP: Record<string, number> = Object.fromEntries(
     KEYS.map((k) => [k.key, k.offset])
 );
 
-const BASE_FREQ = 261.63; // C4
+const BASE_FREQ = 261.63;
 
 function semitoneToFreq(offset: number) {
     return BASE_FREQ * Math.pow(2, offset / 12);
@@ -55,63 +54,101 @@ function semitoneToFreq(offset: number) {
 
 function KeyboardNode({ data }: KeyboardNodeProps) {
     const [activeOffsets, setActiveOffsets] = useState<Set<number>>(new Set());
-    // tracks which keys are currently "down" so we don't refire on OS key-repeat
     const pressedRef = useRef<Set<string>>(new Set());
 
-    const pressKey = async (mapKey: string) => {
-        if (pressedRef.current.has(mapKey)) return; // ignore repeats
-        pressedRef.current.add(mapKey);
-        setActiveOffsets(new Set(Object.values(pressedRef.current).map((k) => KEY_MAP[k])));
+    const updateActiveKeys = () => {
+        setActiveOffsets(
+            new Set(
+                [...pressedRef.current]
+                    .map((k) => KEY_MAP[k])
+                    .filter((v) => v !== undefined)
+            )
+        );
+    };
 
-        const freq = semitoneToFreq(KEY_MAP[mapKey]);
-        await data.engine.keyDown(freq);
+    const pressKey = async (mapKey: string) => {
+        if (!(mapKey in KEY_MAP)) return;
+        if (pressedRef.current.has(mapKey)) return;
+
+        pressedRef.current.add(mapKey);
+        updateActiveKeys();
+
+        await data.engine.keyDown(semitoneToFreq(KEY_MAP[mapKey]));
     };
 
     const releaseKey = async (mapKey: string) => {
+        if (!(mapKey in KEY_MAP)) return;
         if (!pressedRef.current.has(mapKey)) return;
-        pressedRef.current.delete(mapKey);
-        setActiveOffsets(new Set(Array.from(pressedRef.current).map((k) => KEY_MAP[k])));
 
-        const freq = semitoneToFreq(KEY_MAP[mapKey]);
-        await data.engine.keyUp(freq);
+        pressedRef.current.delete(mapKey);
+        updateActiveKeys();
+
+        await data.engine.keyUp(semitoneToFreq(KEY_MAP[mapKey]));
     };
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.repeat) return;
+
             const key = e.key.toLowerCase();
             if (!(key in KEY_MAP)) return;
+
+            e.preventDefault();
             pressKey(key);
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
             const key = e.key.toLowerCase();
             if (!(key in KEY_MAP)) return;
+
+            e.preventDefault();
             releaseKey(key);
+        };
+
+        const handleBlur = () => {
+            pressedRef.current.forEach((key) => {
+                data.engine.keyUp(semitoneToFreq(KEY_MAP[key]));
+            });
+
+            pressedRef.current.clear();
+            updateActiveKeys();
         };
 
         window.addEventListener("keydown", handleKeyDown);
         window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("blur", handleBlur);
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
             window.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("blur", handleBlur);
 
-            // release any still-held keys on unmount
-            pressedRef.current.forEach((mapKey) => {
-                data.engine.keyUp(semitoneToFreq(KEY_MAP[mapKey]));
-            });
-            pressedRef.current.clear();
+            handleBlur();
         };
     }, [data.engine]);
 
     const whiteKeys = KEYS.filter((k) => k.type === "white");
     const blackKeys = KEYS.filter((k) => k.type === "black");
-    const whiteKeyWidth = 100 / whiteKeys.length;
 
-    // black key horizontal position = index of preceding white key + offset into that gap
+    const whiteKeyWidth = 100 / whiteKeys.length;
+    const blackKeyWidth = whiteKeyWidth * 0.6;
+
+    const whiteIndexBefore: Record<number, number> = {
+        1: 0,
+        3: 1,
+        6: 3,
+        8: 4,
+        10: 5,
+        13: 7,
+        15: 8,
+        18: 10,
+        20: 11,
+        22: 12,
+    };
+
     const blackKeyLeft = (offset: number) => {
-        const precedingWhiteCount = whiteKeys.filter((w) => w.offset < offset).length;
-        return precedingWhiteCount * whiteKeyWidth - whiteKeyWidth * 0.3;
+        const index = whiteIndexBefore[offset];
+        return (index + 1) * whiteKeyWidth - blackKeyWidth / 2;
     };
 
     return (
@@ -153,7 +190,7 @@ function KeyboardNode({ data }: KeyboardNodeProps) {
                             }`}
                             style={{
                                 left: `${blackKeyLeft(k.offset)}%`,
-                                width: `${whiteKeyWidth * 0.6}%`,
+                                width: `${blackKeyWidth}%`,
                             }}
                             onMouseDown={() => pressKey(k.key)}
                             onMouseUp={() => releaseKey(k.key)}

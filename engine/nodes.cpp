@@ -126,6 +126,7 @@ void OscillatorNode::process() {
         float frac = phase - index0;
 
         float sample = sample0 + (sample1 - sample0) * frac;
+        sample *= level;
 
         outputBuffer[i] = sample;
         incrementPhase();

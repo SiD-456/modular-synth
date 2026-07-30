@@ -7,6 +7,7 @@ import OscillatorNode from './nodes/Oscillator.tsx';
 import GainNode from './nodes/Gain.tsx';
 import MixerNode from './nodes/Mixer.tsx'
 import OutputNode from './nodes/Output.tsx';
+import ADSRNode from './nodes/Adsr.tsx';
 import KeyboardNode from './nodes/Keyboard.tsx';
 import { useEdgesState, useNodesState } from '@xyflow/react';
 import type { Node, Edge } from "@xyflow/react"
@@ -17,6 +18,7 @@ const nodeTypes = {
   OutputNode: OutputNode,
   MixerNode: MixerNode,
   KeyboardNode: KeyboardNode,
+  ADSRNode: ADSRNode
 }
 
 const nodeList = [
@@ -25,6 +27,7 @@ const nodeList = [
   "OutputNode",
   "MixerNode",
   "KeyboardNode",
+  "ADSRNode",
 ]
 
 function App({ engine }: any) {
