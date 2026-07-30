@@ -68,6 +68,7 @@ EMSCRIPTEN_BINDINGS(audio_graph_module) {
         .function("removeNode", &AudioGraph::removeNode)
         .function("keyUp", &AudioGraph::keyUp)
         .function("keyDown", &AudioGraph::keyDown)
+        .function("changeWaveTable", &AudioGraph::changeWaveTable)
         .function("connectNodes", &AudioGraph::connectNodes, allow_raw_pointers())
         .function("disconnectNodes", &AudioGraph::disconnectNodes, allow_raw_pointers())
         .function("processBuffer", +[](AudioGraph& self) -> val {

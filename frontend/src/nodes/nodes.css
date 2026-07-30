@@ -23,13 +23,6 @@
     color: #ecd9ef;
 }
 
-/* Align input handles with each slider */
-.mixerRow .react-flow__handle-left {
-    left: -18px;
-    top: 50% !important;
-    transform: translateY(-50%);
-}
-
 .keyboardNode {
     width: 340px;
 }
@@ -197,4 +190,66 @@ input[type="range"]::-moz-focus-outer {
 
 input[type="range"]:focus {
     outline: none;
+}
+/* ---------- Themed Dropdowns ---------- */
+
+select {
+    width: 100%;
+    padding: 6px 10px;
+    margin-top: 4px;
+
+    color: #ecd9ef;
+    background-color: #241129;
+
+    border: 1px solid #a83bb5;
+    border-radius: 6px;
+
+    font-size: 13px;
+    cursor: pointer;
+
+    outline: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s,
+        background-color 0.15s;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Custom arrow */
+    background-image:
+        linear-gradient(45deg, transparent 50%, #ecd9ef 50%),
+        linear-gradient(135deg, #ecd9ef 50%, transparent 50%);
+    background-position:
+        calc(100% - 16px) center,
+        calc(100% - 10px) center;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+
+    padding-right: 30px;
+}
+
+select:hover {
+    border-color: #c05ccc;
+    background-color: #2b1630;
+}
+
+select:focus {
+    border-color: #d79ae0;
+    box-shadow: 0 0 0 3px rgba(168, 59, 181, 0.25);
+}
+
+select option {
+    background: #241129;
+    color: #ecd9ef;
+}
+
+label {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    color: #ecd9ef;
+    font-size: 12px;
+    font-weight: 500;
 }

@@ -7,7 +7,7 @@ type NavbarProps = {
     onPlayPause: () => void;
 }
 
-function MyNavbar({isPlaying, onPlayPause}: NavbarProps) {
+function MyNavbar() {
     return (
         <Navbar bg="dark" variant="dark" className="navbar" >
             <div className = "navbar-layout">
@@ -18,12 +18,6 @@ function MyNavbar({isPlaying, onPlayPause}: NavbarProps) {
                 </Navbar.Brand>
 
                 <h5 className = "title">Untitled Project</h5>
-
-                <div className = "control-panel">
-                    <Button onClick = {onPlayPause}>
-                        {isPlaying ? "Pause" : "Play"}
-                    </Button>
-                </div>
             </div>
             
         </Navbar>

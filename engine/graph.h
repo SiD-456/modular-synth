@@ -18,7 +18,11 @@ class AudioGraph {
         float currFreq = 0.0f;
 
     public:
-        std::unique_ptr<WaveTable> swt;
+        std::unique_ptr<WaveTable> sineWaveTable;
+        std::unique_ptr<WaveTable> sawWaveTable;
+        std::unique_ptr<WaveTable> squareWaveTable;
+        std::unique_ptr<WaveTable> triangleWaveTable;
+
         int sampleRate = 44100;
 
         void keyDown(float freq);
@@ -32,6 +36,7 @@ class AudioGraph {
         void disconnectNodes(AudioNode* node1, AudioNode* node2);
         void topologicalSort();
         std::vector<float> processBuffer();
+        void changeWaveTable(int nodeId, std::string waveTable);
 };
 
 void writeWav(const std::string &fileName, const std::vector<float> &samples, int sampleRate);

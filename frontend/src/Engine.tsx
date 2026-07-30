@@ -46,6 +46,10 @@ class Engine {
         return this.call({ type: "connect", srcId, dstId });
     }
 
+    async disconnect(srcId: number, dstId: number) {
+        return this.call({type: "disconnect", srcId, dstId});
+    }
+
     async play() {
         if (this.context.state === "suspended") {
             await this.context.resume();
@@ -156,6 +160,21 @@ class Engine {
             nodeId,
             release,
         });
+    }
+
+    async changeWaveTable(nodeId: number, waveTable: string) {
+        return this.call({
+            type: "changeWaveTable",
+            nodeId,
+            waveTable
+        })
+    }
+
+    async deleteNode(nodeId: number){
+        return this.call({
+            type: "deletNode",
+            nodeId
+        })
     }
 }
 

@@ -22,6 +22,24 @@ class SineWaveTable : public WaveTable {
         void constructWaveTable() override;
 };
 
+class SawWaveTable: public WaveTable {
+    public:
+        SawWaveTable(int size);
+        void constructWaveTable() override;
+};
+
+class SquareWaveTable: public WaveTable {
+    public:
+        SquareWaveTable(int size);
+        void constructWaveTable() override;
+};
+
+class TriangleWaveTable: public WaveTable {
+    public:
+        TriangleWaveTable(int size);
+        void constructWaveTable() override;
+};
+
 class AudioNode {
     public:
         int chunkSize = CHUNKSIZE;

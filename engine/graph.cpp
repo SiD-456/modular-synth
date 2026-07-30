@@ -5,23 +5,12 @@
 #include <cstdio>
 #include <cstdarg>
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#else
-#define EM_LOG_CONSOLE 0
-inline void emscripten_log(int, const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    vprintf(fmt, args);
-    printf("\n");
-    va_end(args);
-}
-#endif
-
 AudioGraph::AudioGraph()
 {
-    swt = std::make_unique<SineWaveTable>(1024);
+    sineWaveTable = std::make_unique<SineWaveTable>(1024);
+    sawWaveTable = std::make_unique<SawWaveTable>(1024);
+    squareWaveTable = std::make_unique<SquareWaveTable>(1024);
+    triangleWaveTable = std::make_unique<TriangleWaveTable>(1024);
 }
 
 AudioNode *AudioGraph::addNode(std::string nodeType)
@@ -29,7 +18,7 @@ AudioNode *AudioGraph::addNode(std::string nodeType)
     std::unique_ptr<AudioNode> node;
     if (nodeType == "OscillatorNode")
     {
-        node = std::make_unique<OscillatorNode>(this, swt.get());
+        node = std::make_unique<OscillatorNode>(this, sineWaveTable.get());
         sourceNodes.push_back(dynamic_cast<OscillatorNode *>(node.get()));
     }
     else if (nodeType == "GainNode")
@@ -178,6 +167,31 @@ std::vector<float> AudioGraph::processBuffer()
     // emscripten_log(EM_LOG_CONSOLE, "Buffer size: %d", mysize);
 
     return this->outputNode->getBuffer();
+}
+
+void AudioGraph::changeWaveTable(int nodeId, std::string waveTable){
+    AudioNode* node = getNodeById(nodeId);
+    auto osc = dynamic_cast<OscillatorNode*>(node);
+    if(!osc){
+        return;
+    }
+
+    WaveTable* wt;
+    if(waveTable == "Sine"){
+        wt = sineWaveTable.get();
+    }
+    else if(waveTable == "Saw"){
+        wt = sawWaveTable.get();
+    }
+    else if(waveTable == "Square"){
+        wt = squareWaveTable.get();
+    }
+    else if(waveTable == "Triangle"){
+        wt = triangleWaveTable.get();
+    }
+    else return;
+
+    osc->changeWaveTable(wt);
 }
 
 void writeWav(const std::string &fileName, const std::vector<float> &samples, int sampleRate)

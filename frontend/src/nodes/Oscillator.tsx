@@ -1,6 +1,8 @@
 import { Handle, Position } from "@xyflow/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./nodes.css";
+
+type WaveTable = "Sine" | "Square" | "Saw" | "Triangle";
 
 type OscillatorNodeProps = {
     data: {
@@ -10,27 +12,14 @@ type OscillatorNodeProps = {
 };
 
 function OscillatorNode({ data }: OscillatorNodeProps) {
-    const [frequency, setFrequency] = useState(440);
+    const [waveTable, setWaveTable] = useState<WaveTable>("Sine");
 
-    useEffect(() => {
-        //console.log(data.nodeId);
-        const loadFrequency = async () => {
-            const freq = await data.engine.getFrequency(data.nodeId);
-            setFrequency(freq);
-        };
-
-        loadFrequency();
-    }, [data.engine, data.nodeId]);
-
-    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    setFrequency(value);
-    await data.engine.setFrequency(data.nodeId, value);
-};
-
-    const handleCommit = async () => {
-        console.log(frequency);
-        await data.engine.setFrequency(data.nodeId, frequency);
+    const handleWaveTableChange = async (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+        const value = e.target.value as WaveTable;
+        setWaveTable(value);
+        await data.engine.changeWaveTable(data.nodeId, value);
     };
 
     return (
@@ -39,20 +28,29 @@ function OscillatorNode({ data }: OscillatorNodeProps) {
 
             <h4>Oscillator</h4>
 
-            <p>Frequency: {frequency} Hz</p>
+            <div style={{ marginTop: "10px" }}>
+                <label htmlFor={`wavetable-${data.nodeId}`}>
+                    Wave Table
+                </label>
 
-            <input
-                className="nodrag"
-                type="range"
-                min={20}
-                max={2000}
-                step={1}
-                value={frequency}
-                onChange={handleChange}
-                onMouseUp={handleCommit}
-                onTouchEnd={handleCommit}
-                onPointerUp={() => console.log("pointer up")}
-            />
+                <select
+                    id={`wavetable-${data.nodeId}`}
+                    className="nodrag"
+                    value={waveTable}
+                    onChange={handleWaveTableChange}
+                    style={{
+                        width: "100%",
+                        marginTop: "6px",
+                        padding: "6px",
+                        borderRadius: "6px",
+                    }}
+                >
+                    <option value="Sine">Sine</option>
+                    <option value="Square">Square</option>
+                    <option value="Saw">Saw</option>
+                    <option value="Triangle">Triangle</option>
+                </select>
+            </div>
         </div>
     );
 }

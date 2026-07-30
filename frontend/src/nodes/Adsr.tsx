@@ -83,37 +83,49 @@ function ADSRNode({ data }: ADSRNodeProps) {
                 viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
                 style={{
                     width: "100%",
-                    border: "1px solid #555",
+                    border: "1px solid #a83bb5",
                     borderRadius: "6px",
-                    background: "#1c1c1c",
+                    background: "#1b0d20",
                     marginBottom: "10px",
                 }}
             >
-                {/* Horizontal grid */}
+                {/* Grid */}
                 {[0.25, 0.5, 0.75].map((v) => (
                     <line
                         key={v}
-                        x1={0}
+                        x1={PADDING}
                         y1={HEIGHT * v}
-                        x2={WIDTH}
+                        x2={WIDTH - PADDING}
                         y2={HEIGHT * v}
-                        stroke="#333"
+                        stroke="#4b2952"
                         strokeWidth={1}
                     />
                 ))}
 
+                {/* Baseline */}
+                <line
+                    x1={PADDING}
+                    y1={yBottom}
+                    x2={WIDTH - PADDING}
+                    y2={yBottom}
+                    stroke="#6b3c72"
+                    strokeWidth={1}
+                />
+
                 {/* Envelope */}
                 <polyline
                     fill="none"
-                    stroke="#4CAF50"
+                    stroke="#ecd9ef"
                     strokeWidth={3}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
                     points={`
-                        ${x0},${yBottom}
-                        ${x1},${yTop}
-                        ${x2},${ySustain}
-                        ${x3},${ySustain}
-                        ${x4},${yBottom}
-                    `}
+            ${x0},${yBottom}
+            ${x1},${yTop}
+            ${x2},${ySustain}
+            ${x3},${ySustain}
+            ${x4},${yBottom}
+        `}
                 />
 
                 {/* Control points */}
@@ -128,8 +140,10 @@ function ADSRNode({ data }: ADSRNodeProps) {
                         key={i}
                         cx={x}
                         cy={y}
-                        r={3}
-                        fill="#4CAF50"
+                        r={4}
+                        fill="#a83bb5"
+                        stroke="#ecd9ef"
+                        strokeWidth={2}
                     />
                 ))}
             </svg>

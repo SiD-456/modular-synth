@@ -38,17 +38,28 @@ class AudioProcessor extends AudioWorkletProcessor {
                 this.port.postMessage({ requestId: msg.requestId, result: nodeId });
                 break;
             }
+            case "deleteNode": {
+                this.graph.removeNode(src.nodeId);
+                this.port.postMessage({requestId: msg.requestId, result: null});
+                break;
+            }
             case "connect": {
                 const sourceNode = this.graph.getNodeById(msg.srcId);
                 const destNode = this.graph.getNodeById(msg.dstId);
-                //console.log(sourceNode, destNode);
                 this.graph.connectNodes(sourceNode, destNode);
                 this.port.postMessage({ requestId: msg.requestId, result: null });
                 break;
             }
 
+            case "disconnect" : {
+                const sourceNode = this.graph.getNodeById(msg.srcId);
+                const destNode = this.graph.getNodeById(msg.dstId);
+                this.graph.disconnectNodes(sourceNode, destNode);
+                this.port.postMessage({requestId: msg.requestId, result: null});
+                break;
+            }
+
             case "play": {
-                //console.log("started playing");
                 this.isPlaying = true;
                 break;
             }
@@ -190,6 +201,15 @@ class AudioProcessor extends AudioWorkletProcessor {
                     requestId: msg.requestId,
                     result: msg.release,
                 });
+                break;
+            }
+
+            case "changeWaveTable": {
+                this.graph.changeWaveTable(msg.nodeId, msg.waveTable);
+                this.port.postMessage({
+                    requestId: msg.requestId,
+                    reuslt: null
+                })
                 break;
             }
         }

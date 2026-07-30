@@ -5,54 +5,121 @@
 
 constexpr double PI = 3.14159265358979323846;
 
-//WaveTable
-SineWaveTable::SineWaveTable(int size) {
+// WaveTable
+SineWaveTable::SineWaveTable(int size)
+{
     this->size = size;
     constructWaveTable();
 }
 
-void SineWaveTable::constructWaveTable() {
+void SineWaveTable::constructWaveTable()
+{
     waveTable.resize(size);
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
+    {
         waveTable[i] = (sin(2 * PI * i / size));
     }
 }
 
-//AudioNode base class
-void AudioNode::setId(int id) {
+SawWaveTable::SawWaveTable(int size)
+{
+    this->size = size;
+    constructWaveTable();
+}
+
+void SawWaveTable::constructWaveTable()
+{
+    waveTable.resize(size);
+    for (int i = 0; i < size; i++)
+    {
+        waveTable[i] = 1.0f - 2.0f * static_cast<float>(i) / size;
+    }
+}
+
+SquareWaveTable::SquareWaveTable(int size)
+{
+    this->size = size;
+    constructWaveTable();
+}
+
+void SquareWaveTable::constructWaveTable()
+{
+    waveTable.resize(size);
+    for (int i = 0; i < size; i++)
+    {
+        if (i < size / 2)
+            waveTable[i] = 1;
+        else
+            waveTable[i] = -1;
+    }
+}
+
+TriangleWaveTable::TriangleWaveTable(int size) {
+    this->size = size;
+    constructWaveTable();
+}
+
+void TriangleWaveTable::constructWaveTable()
+{
+    waveTable.resize(size);
+
+    for (int i = 0; i < size; ++i)
+    {
+        float x = static_cast<float>(i) / size;
+        waveTable[i] = 1.0f - 4.0f * std::abs(x - 0.5f);
+    }
+}
+
+// AudioNode base class
+void AudioNode::setId(int id)
+{
     this->id = id;
 }
 
-int AudioNode::getId() {
+int AudioNode::getId()
+{
     return this->id;
 }
 
-bool AudioNode::addInput(AudioNode* node) {
-    if (inputNodes.size() >= maxInputs()) {
+bool AudioNode::addInput(AudioNode *node)
+{
+    if (inputNodes.size() >= maxInputs())
+    {
         return false;
-    } else {
+    }
+    else
+    {
         inputNodes.push_back(node);
         onInputAdded();
         return true;
     }
 }
 
-bool AudioNode::addOutput(AudioNode* node) {
-    if (outputNodes.size() >= maxOutputs()) {
+bool AudioNode::addOutput(AudioNode *node)
+{
+    if (outputNodes.size() >= maxOutputs())
+    {
         return false;
-    } else {
+    }
+    else
+    {
         outputNodes.push_back(node);
         return true;
     }
 }
 
-bool AudioNode::removeInput(AudioNode* node) {
-    if (inputNodes.size() <= minInputs()) {
+bool AudioNode::removeInput(AudioNode *node)
+{
+    if (inputNodes.size() <= minInputs())
+    {
         return false;
-    } else {
+    }
+    else
+    {
         auto it = std::find(inputNodes.begin(), inputNodes.end(), node);
 
-        if (it != inputNodes.end()) {
+        if (it != inputNodes.end())
+        {
             size_t index = it - inputNodes.begin();
             inputNodes.erase(it);
             onInputRemoved(index);
@@ -63,13 +130,18 @@ bool AudioNode::removeInput(AudioNode* node) {
     }
 }
 
-bool AudioNode::removeOutput(AudioNode* node) {
-    if (outputNodes.size() <= minOutputs()) {
+bool AudioNode::removeOutput(AudioNode *node)
+{
+    if (outputNodes.size() <= minOutputs())
+    {
         return false;
-    } else {
+    }
+    else
+    {
         auto it = std::find(outputNodes.begin(), outputNodes.end(), node);
 
-        if (it != outputNodes.end()) {
+        if (it != outputNodes.end())
+        {
             outputNodes.erase(it);
             return true;
         }
@@ -78,45 +150,55 @@ bool AudioNode::removeOutput(AudioNode* node) {
     }
 }
 
-//Oscillator 
-OscillatorNode::OscillatorNode(const AudioGraph* graph, const WaveTable* wt) : table(wt) {
+// Oscillator
+OscillatorNode::OscillatorNode(const AudioGraph *graph, const WaveTable *wt) : table(wt)
+{
     updatePhaseInc();
     setSampleRate(graph->sampleRate);
 }
 
-void OscillatorNode::changeWaveTable(WaveTable* wt) {
+void OscillatorNode::changeWaveTable(WaveTable *wt)
+{
     table = wt;
     updatePhaseInc();
 }
 
-void OscillatorNode::updatePhaseInc() {
+void OscillatorNode::updatePhaseInc()
+{
     phaseInc = table->size * frequency / sampleRate;
 }
 
-void OscillatorNode::setSampleRate(int sampleRate) {
+void OscillatorNode::setSampleRate(int sampleRate)
+{
     this->sampleRate = sampleRate;
     updatePhaseInc();
 }
 
-void OscillatorNode::setFrequency(float frequency) {
+void OscillatorNode::setFrequency(float frequency)
+{
     this->frequency = frequency;
     updatePhaseInc();
 }
 
-float OscillatorNode::getFrequency(){
+float OscillatorNode::getFrequency()
+{
     return this->frequency;
 }
 
-void OscillatorNode::incrementPhase() {
+void OscillatorNode::incrementPhase()
+{
     phase += phaseInc;
-    while (phase >= table->size) {
+    while (phase >= table->size)
+    {
         phase -= table->size;
     }
 }
 
-void OscillatorNode::process() {
+void OscillatorNode::process()
+{
     outputBuffer.resize(chunkSize);
-    for (int i = 0; i < chunkSize; i++) {
+    for (int i = 0; i < chunkSize; i++)
+    {
         int index0 = (int)phase;
         int index1 = (index0 + 1) % table->size;
 
@@ -133,139 +215,173 @@ void OscillatorNode::process() {
     }
 }
 
-//Gain
-void GainNode::setGainControl(float gainControl) {
+// Gain
+void GainNode::setGainControl(float gainControl)
+{
     this->gainControl = gainControl;
 }
 
-float GainNode::getGainControl(){
+float GainNode::getGainControl()
+{
     return this->gainControl;
 }
 
-void GainNode::process() {
-    std::vector<float>& inputBuffer = inputNodes[0]->outputBuffer;
+void GainNode::process()
+{
+    std::vector<float> &inputBuffer = inputNodes[0]->outputBuffer;
     outputBuffer.resize(chunkSize);
-    for (int i = 0; i < chunkSize; i++) {
+    for (int i = 0; i < chunkSize; i++)
+    {
         outputBuffer[i] = inputBuffer[i] * gainControl;
     }
 }
 
-//Mixer
-void MixerNode::onInputAdded() {
+// Mixer
+void MixerNode::onInputAdded()
+{
     mixerAmplitudes.push_back(1.0f);
 }
 
-void MixerNode::onInputRemoved(size_t index) {
+void MixerNode::onInputRemoved(size_t index)
+{
     mixerAmplitudes.erase(mixerAmplitudes.begin() + index);
 }
 
-void MixerNode::updateAmplitude(AudioNode* node, float amplitude) {
+void MixerNode::updateAmplitude(AudioNode *node, float amplitude)
+{
     auto it = std::find(inputNodes.begin(), inputNodes.end(), node);
-    if (it != inputNodes.end()) {
+    if (it != inputNodes.end())
+    {
         size_t index = it - inputNodes.begin();
         mixerAmplitudes[index] = amplitude;
     }
 }
 
-void MixerNode::process() {
+void MixerNode::process()
+{
     outputBuffer.resize(chunkSize);
-    for (int i = 0; i < chunkSize; i++) {
+    for (int i = 0; i < chunkSize; i++)
+    {
         float sample = 0.0f;
         float mixerSum = 0.0f;
-        for (int j = 0; j < inputNodes.size(); j++) {
+        for (int j = 0; j < inputNodes.size(); j++)
+        {
             sample += inputNodes[j]->outputBuffer[i] * mixerAmplitudes[j];
             mixerSum += mixerAmplitudes[j];
         }
-        if (mixerSum > 0.0f) {
+        if (mixerSum > 0.0f)
+        {
             sample /= mixerSum;
-        } else sample = 0;
+        }
+        else
+            sample = 0;
         outputBuffer[i] = sample;
     }
 }
 
-//ADSR envelope
-ADSRNode::ADSRNode(const AudioGraph* graph){
+// ADSR envelope
+ADSRNode::ADSRNode(const AudioGraph *graph)
+{
     this->sampleRate = graph->sampleRate;
 }
 
-float ADSRNode::getAttack() const{
+float ADSRNode::getAttack() const
+{
     return attackTime;
 }
 
-float ADSRNode::getDecay() const{
+float ADSRNode::getDecay() const
+{
     return decayTime;
 }
 
-float ADSRNode::getSustain() const{
+float ADSRNode::getSustain() const
+{
     return sustainLevel;
 }
 
-float ADSRNode::getRelease() const{
+float ADSRNode::getRelease() const
+{
     return releaseTime;
 }
 
-void ADSRNode::setAttack(float attackTime){
+void ADSRNode::setAttack(float attackTime)
+{
     this->attackTime = std::max(0.01f, attackTime);
 }
 
-void ADSRNode::setDecay(float decayTime){
+void ADSRNode::setDecay(float decayTime)
+{
     this->decayTime = std::max(0.01f, decayTime);
 }
 
-void ADSRNode::setSustain(float sustainLevel){
+void ADSRNode::setSustain(float sustainLevel)
+{
     this->sustainLevel = std::clamp(sustainLevel, 0.0f, 1.0f);
 }
 
-void ADSRNode::setRelease(float releaseTime){
+void ADSRNode::setRelease(float releaseTime)
+{
     this->releaseTime = std::max(0.01f, releaseTime);
 }
 
-void ADSRNode::updateIncrement(){
-    switch(state){
-        case EnvelopeState::Idle:
-            increment = 0.0f;
-            break;
-        case EnvelopeState::Attack:
-            increment = (1.0f - level)/(attackTime * sampleRate);
-            break;
-        case EnvelopeState::Decay:
-            increment = (sustainLevel - level)/(decayTime * sampleRate);
-            break;
-        case EnvelopeState::Sustain:
-            increment = 0.0f;
-            break;
-        case EnvelopeState::Release:
-            increment = (0.0f - level)/(releaseTime * sampleRate);
-            break;
+void ADSRNode::updateIncrement()
+{
+    switch (state)
+    {
+    case EnvelopeState::Idle:
+        increment = 0.0f;
+        break;
+    case EnvelopeState::Attack:
+        increment = (1.0f - level) / (attackTime * sampleRate);
+        break;
+    case EnvelopeState::Decay:
+        increment = (sustainLevel - level) / (decayTime * sampleRate);
+        break;
+    case EnvelopeState::Sustain:
+        increment = 0.0f;
+        break;
+    case EnvelopeState::Release:
+        increment = (0.0f - level) / (releaseTime * sampleRate);
+        break;
     }
 }
 
-void ADSRNode::keyDown(){
+void ADSRNode::keyDown()
+{
+    //level = 0.0f; Reset level to 0.0f to remove legato effect.
     state = EnvelopeState::Attack;
     updateIncrement();
 }
 
-void ADSRNode::keyUp(){
+void ADSRNode::keyUp()
+{
     state = EnvelopeState::Release;
     updateIncrement();
 }
 
-void ADSRNode::process(){
-    if(inputNodes.empty()) return;
+void ADSRNode::process()
+{
+    if (inputNodes.empty())
+        return;
     float epsilon = 0.0001f;
     outputBuffer.resize(chunkSize);
-    for(int i = 0; i < chunkSize; i++){
-        if(state == EnvelopeState::Attack && level >= 1){
+    for (int i = 0; i < chunkSize; i++)
+    {
+        if (state == EnvelopeState::Attack && level >= 1)
+        {
             level = 1;
             state = EnvelopeState::Decay;
             updateIncrement();
         }
-        else if(state == EnvelopeState::Decay && (std::abs(level - sustainLevel) <= epsilon || level <= sustainLevel)){
+        else if (state == EnvelopeState::Decay && (std::abs(level - sustainLevel) <= epsilon || level <= sustainLevel))
+        {
             level = sustainLevel;
             state = EnvelopeState::Sustain;
             updateIncrement();
         }
-        else if(state == EnvelopeState::Release && (std::abs(level - 0.0f) <= epsilon || level <= 0.0f)){
+        else if (state == EnvelopeState::Release && (std::abs(level - 0.0f) <= epsilon || level <= 0.0f))
+        {
             level = 0.0f;
             state = EnvelopeState::Idle;
             updateIncrement();
@@ -276,14 +392,17 @@ void ADSRNode::process(){
     }
 }
 
-//Output
-void OutputNode::process() {
+// Output
+void OutputNode::process()
+{
     outputBuffer.resize(chunkSize);
-    for (int i = 0; i < chunkSize; i++) {
+    for (int i = 0; i < chunkSize; i++)
+    {
         outputBuffer[i] = inputNodes[0]->outputBuffer[i];
     }
 }
 
-const std::vector<float>& OutputNode::getBuffer() {
+const std::vector<float> &OutputNode::getBuffer()
+{
     return outputBuffer;
 }

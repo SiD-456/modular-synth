@@ -11,6 +11,7 @@ import ADSRNode from './nodes/Adsr.tsx';
 import KeyboardNode from './nodes/Keyboard.tsx';
 import { useEdgesState, useNodesState } from '@xyflow/react';
 import type { Node, Edge } from "@xyflow/react"
+import { useEffect } from 'react';
 
 const nodeTypes = {
   OscillatorNode: OscillatorNode,
@@ -37,16 +38,32 @@ function App({ engine }: any) {
 
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const onPlayPause = async () => {
-    const nextState = !isPlaying;
-    setIsPlaying(nextState);
 
-    if (nextState) {
-        await engine.play();
+const onPlayPause = async () => {
+    if (isPlaying) {
+        await engine.pause();
+        setIsPlaying(false);
     } else {
-        engine.pause();
+        await engine.play();
+        setIsPlaying(true);
     }
-  }
+};
+
+useEffect(() => {
+        const unlock = async () => {
+            if (engine.context.state === "suspended") {
+                await engine.play();
+            }
+            window.removeEventListener("pointerdown", unlock);
+        };
+
+        window.addEventListener("pointerdown", unlock);
+
+        return () => {
+            window.removeEventListener("pointerdown", unlock);
+        };
+    }, [engine]);
+
 
   async function createNode(node: string) {
     if(node === "KeyboardNode"){
@@ -74,10 +91,7 @@ function App({ engine }: any) {
 
   return (<>
     <div className="layout">
-      <Navbar
-        isPlaying={isPlaying}
-        onPlayPause={onPlayPause}
-      />
+      <Navbar/>
       <Sidebar nodeList={nodeList}
         createNode={createNode}
       />
