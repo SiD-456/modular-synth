@@ -37,6 +37,23 @@ EMSCRIPTEN_BINDINGS(audio_graph_module) {
         .function("process", &MixerNode::process)
         ;
 
+    class_<ADSRNode, base<AudioNode>>("ADSRNode")
+        .constructor<const AudioGraph*>()
+
+        .function("keyDown", &ADSRNode::keyDown)
+        .function("keyUp", &ADSRNode::keyUp)
+
+        .function("getAttack", &ADSRNode::getAttack)
+        .function("getDecay", &ADSRNode::getDecay)
+        .function("getSustain", &ADSRNode::getSustain)
+        .function("getRelease", &ADSRNode::getRelease)
+
+        .function("setAttack", &ADSRNode::setAttack)
+        .function("setDecay", &ADSRNode::setDecay)
+        .function("setSustain", &ADSRNode::setSustain)
+        .function("setRelease", &ADSRNode::setRelease)
+        ;
+
     class_<OutputNode, base<AudioNode>>("OutputNode")
         .function("process", &OutputNode::process)
         .function("getBuffer", +[](OutputNode& self) -> val {
@@ -49,6 +66,8 @@ EMSCRIPTEN_BINDINGS(audio_graph_module) {
         .function("addNode", &AudioGraph::addNode, allow_raw_pointers())
         .function("getNodeById", &AudioGraph::getNodeById, allow_raw_pointers())
         .function("removeNode", &AudioGraph::removeNode)
+        .function("keyUp", &AudioGraph::keyUp)
+        .function("keyDown", &AudioGraph::keyDown)
         .function("connectNodes", &AudioGraph::connectNodes, allow_raw_pointers())
         .function("disconnectNodes", &AudioGraph::disconnectNodes, allow_raw_pointers())
         .function("processBuffer", +[](AudioGraph& self) -> val {

@@ -7,6 +7,7 @@ import OscillatorNode from './nodes/Oscillator.tsx';
 import GainNode from './nodes/Gain.tsx';
 import MixerNode from './nodes/Mixer.tsx'
 import OutputNode from './nodes/Output.tsx';
+import KeyboardNode from './nodes/Keyboard.tsx';
 import { useEdgesState, useNodesState } from '@xyflow/react';
 import type { Node, Edge } from "@xyflow/react"
 
@@ -14,7 +15,8 @@ const nodeTypes = {
   OscillatorNode: OscillatorNode,
   GainNode: GainNode,
   OutputNode: OutputNode,
-  MixerNode: MixerNode
+  MixerNode: MixerNode,
+  KeyboardNode: KeyboardNode,
 }
 
 const nodeList = [
@@ -22,6 +24,7 @@ const nodeList = [
   "GainNode",
   "OutputNode",
   "MixerNode",
+  "KeyboardNode",
 ]
 
 function App({ engine }: any) {
@@ -43,6 +46,18 @@ function App({ engine }: any) {
   }
 
   async function createNode(node: string) {
+    if(node === "KeyboardNode"){
+      console.log("hi");
+      const newNode = {
+      id: crypto.randomUUID(),
+      type: node,
+      position: { x: 100, y: 100 + nodes.length * 110 },
+      data: { engine }
+    };
+
+    setNodes(nodes => [...nodes, newNode]);
+    return;
+    }
     const nodeId = await engine.addNode(node);
     const newNode = {
       id: crypto.randomUUID(),

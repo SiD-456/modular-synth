@@ -14,11 +14,14 @@ class AudioGraph {
         std::vector<int> topologicalOrder;
         OutputNode* outputNode = nullptr;
         std::vector<OscillatorNode*> sourceNodes;
+        std::vector<ADSRNode*> adsrNodes;
 
     public:
         std::unique_ptr<WaveTable> swt;
         int sampleRate = 44100;
 
+        void keyDown(float freq);
+        void keyUp();
         AudioGraph();
         int getSampleRate();
         AudioNode* addNode(std::string nodeType);
