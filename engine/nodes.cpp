@@ -228,6 +228,11 @@ float GainNode::getGainControl()
 
 void GainNode::process()
 {
+    if(inputNodes.size() == 0){
+        std::fill(outputBuffer.begin(), outputBuffer.end(), 0.0f);
+        return;
+    }
+    
     std::vector<float> &inputBuffer = inputNodes[0]->outputBuffer;
     outputBuffer.resize(chunkSize);
     for (int i = 0; i < chunkSize; i++)
@@ -260,21 +265,17 @@ void MixerNode::updateAmplitude(AudioNode *node, float amplitude)
 void MixerNode::process()
 {
     outputBuffer.resize(chunkSize);
+    if(inputNodes.size() == 0){
+        std::fill(outputBuffer.begin(), outputBuffer.end(), 0.0f);
+        return;
+    }
     for (int i = 0; i < chunkSize; i++)
     {
         float sample = 0.0f;
-        float mixerSum = 0.0f;
         for (int j = 0; j < inputNodes.size(); j++)
         {
             sample += inputNodes[j]->outputBuffer[i] * mixerAmplitudes[j];
-            mixerSum += mixerAmplitudes[j];
         }
-        if (mixerSum > 0.0f)
-        {
-            sample /= mixerSum;
-        }
-        else
-            sample = 0;
         outputBuffer[i] = sample;
     }
 }
@@ -362,8 +363,11 @@ void ADSRNode::keyUp()
 
 void ADSRNode::process()
 {
-    if (inputNodes.empty())
+    if(inputNodes.size() == 0){
+        std::fill(outputBuffer.begin(), outputBuffer.end(), 0.0f);
         return;
+    }
+
     float epsilon = 0.0001f;
     outputBuffer.resize(chunkSize);
     for (int i = 0; i < chunkSize; i++)
@@ -396,6 +400,11 @@ void ADSRNode::process()
 void OutputNode::process()
 {
     outputBuffer.resize(chunkSize);
+    if(inputNodes.size() == 0){
+        std::fill(outputBuffer.begin(), outputBuffer.end(), 0.0f);
+        return;
+    }
+
     for (int i = 0; i < chunkSize; i++)
     {
         outputBuffer[i] = inputNodes[0]->outputBuffer[i];

@@ -33,7 +33,7 @@ function GainNode({ data }: GainNodeProps) {
 
     const handleCommit = async () => {
         const gain = Math.pow(10, db / 20);
-        console.log(gain);
+        //console.log(gain);
         await data.engine.setGain(data.nodeId, gain);
     };
 

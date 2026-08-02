@@ -1,111 +1,101 @@
-import {
-    Handle,
-    Position,
-    useNodeConnections,
-    useReactFlow,
-} from "@xyflow/react";
-import { useState } from "react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
+import { useCallback, useState } from "react";
 import "./nodes.css";
 
 type MixerNodeProps = {
-    id: string;
     data: {
         engine: any;
         nodeId: number;
     };
+    id: string;
 };
 
-const sliderToGain = (v: number) => {
-    // 0 -> 0
-    if (v === 0) return 0;
+const INPUT_COUNT = 5;
 
-    // -60dB to +6dB
-    const db = -60 + (v / 100) * 66;
-    return Math.pow(10, db / 20);
-};
+function MixerNode({ data, id }: MixerNodeProps) {
+    const { getEdges, getNode } = useReactFlow();
+    const [amplitudes, setAmplitudes] = useState<number[]>(
+        Array(INPUT_COUNT).fill(1)
+    );
 
-const gainToString = (gain: number) => gain.toFixed(2);
+    const handleAmplitudeChange = useCallback(
+        async (index: number, value: number) => {
+            setAmplitudes((prev) => {
+                const next = [...prev];
+                next[index] = value;
+                return next;
+            });
 
-function MixerNode({ id, data }: MixerNodeProps) {
-    const { getNode } = useReactFlow();
+            const handleId = `input-${index}`;
 
-    const connections = useNodeConnections({
-        id,
-        handleType: "target",
-    });
-
-    // slider positions (0-100)
-    const [sliderValues, setSliderValues] = useState([91, 91, 91, 91, 91]);
-
-    const handleChange =
-        (index: number) =>
-        async (e: React.ChangeEvent<HTMLInputElement>) => {
-            const slider = Number(e.target.value);
-
-            const next = [...sliderValues];
-            next[index] = slider;
-            setSliderValues(next);
-
-            const gain = sliderToGain(slider);
-
-            const connection = connections.find(
-                (c) => c.targetHandle === `in-${index}`
+            // Find the edge feeding this specific handle, then resolve the
+            // source node to get its engine-side nodeId.
+            const edge = getEdges().find(
+                (e) => e.target === id && e.targetHandle === handleId
             );
+            if (!edge) return;
 
-            if (!connection) return;
-
-            const sourceNode = getNode(connection.source);
-
+            const sourceNode = getNode(edge.source);
             if (!sourceNode) return;
 
-            await data.engine.updateAmplitude(
-                data.nodeId,
-                sourceNode.data.nodeId,
-                gain
-            );
-        };
+            const inputNodeId = sourceNode.data.nodeId as number;
+
+            await data.engine.updateAmplitude(data.nodeId, inputNodeId, value);
+        },
+        [getEdges, getNode, id, data.engine, data.nodeId]
+    );
 
     return (
-        <div className="audioNode mixerNode">
-            <Handle
-                id="out"
-                type="source"
-                position={Position.Right}
-                style={{ top: "50%" }}
-            />
-
+        <div className="audioNode">
+            <Handle type="source" position={Position.Right} />
             <h4>Mixer</h4>
+            <div style={{ marginTop: "10px" }}>
+                {Array.from({ length: INPUT_COUNT }).map((_, index) => {
+                    const handleId = `input-${index}`;
+                    const inputLabelId = `${handleId}-${data.nodeId}`;
 
-            {sliderValues.map((slider, i) => {
-                const gain = sliderToGain(slider);
-
-                return (
-                    <div key={i} className="mixerRow">
-                        <Handle
-                            id={`in-${i}`}
-                            type="target"
-                            position={Position.Left}
-                            style={{ top: "50%" }}
-                        />
-
-                        <label>Input {i + 1}</label>
-
-                        <input
-                            className="nodrag"
-                            type="range"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={slider}
-                            onChange={handleChange(i)}
-                        />
-
-                        <span className="gainValue">
-                            {gainToString(gain)}
-                        </span>
-                    </div>
-                );
-            })}
+                    return (
+                        <div
+                            key={handleId}
+                            style={{
+                                position: "relative",
+                                marginTop: index === 0 ? 0 : "14px",
+                                paddingLeft: "4px",
+                            }}
+                        >
+                            <Handle
+                                type="target"
+                                position={Position.Left}
+                                id={handleId}
+                                style={{ top: "50%" }}
+                            />
+                            <label htmlFor={inputLabelId}>
+                                Input {index + 1}
+                            </label>
+                            <input
+                                id={inputLabelId}
+                                className="nodrag"
+                                type="range"
+                                min={0}
+                                max={1}
+                                step={0.01}
+                                value={amplitudes[index]}
+                                onChange={(e) =>
+                                    handleAmplitudeChange(
+                                        index,
+                                        parseFloat(e.target.value)
+                                    )
+                                }
+                                style={{
+                                    width: "100%",
+                                    marginTop: "6px",
+                                    display: "block",
+                                }}
+                            />
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

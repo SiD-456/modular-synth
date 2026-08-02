@@ -39,7 +39,8 @@ class AudioProcessor extends AudioWorkletProcessor {
                 break;
             }
             case "deleteNode": {
-                this.graph.removeNode(src.nodeId);
+                //console.log("Deleting node")
+                this.graph.removeNode(msg.nodeId);
                 this.port.postMessage({requestId: msg.requestId, result: null});
                 break;
             }

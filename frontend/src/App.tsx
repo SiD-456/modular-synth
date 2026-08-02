@@ -36,19 +36,6 @@ function App({ engine }: any) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-
-  const [isPlaying, setIsPlaying] = useState(false);
-
-const onPlayPause = async () => {
-    if (isPlaying) {
-        await engine.pause();
-        setIsPlaying(false);
-    } else {
-        await engine.play();
-        setIsPlaying(true);
-    }
-};
-
 useEffect(() => {
         const unlock = async () => {
             if (engine.context.state === "suspended") {

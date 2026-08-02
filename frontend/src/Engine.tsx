@@ -42,6 +42,13 @@ class Engine {
         return this.call({ type: "addNode", nodeType });
     }
 
+    async deleteNode(nodeId: number){
+        return this.call({
+            type: "deleteNode",
+            nodeId
+        })
+    }
+
     async connect(srcId: number, dstId: number): Promise<void> {
         return this.call({ type: "connect", srcId, dstId });
     }
@@ -167,13 +174,6 @@ class Engine {
             type: "changeWaveTable",
             nodeId,
             waveTable
-        })
-    }
-
-    async deleteNode(nodeId: number){
-        return this.call({
-            type: "deletNode",
-            nodeId
         })
     }
 }

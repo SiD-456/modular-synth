@@ -50,6 +50,23 @@ function Canvas({ nodes, edges, setNodes, setEdges, nodeTypes, onNodesChange, on
             setEdges((eds) => addEdge(connection, eds));
         };
 
+        const deleteNode = async (node: Node) => {
+            engine.deleteNode(node.data.nodeId);
+        }
+
+        const deleteEdge = async (edge: Edge) => {
+            const sourceNode = nodes.find(n => n.id === edge.source);
+            const targetNode = nodes.find(n =>n.id === edge.target);
+
+            if (!sourceNode || !targetNode)
+                return;
+
+            await engine.disconnect(
+                sourceNode.data.nodeId,
+                targetNode.data.nodeId
+            );
+        }
+
     return (
         <div className="canvas">
             <ReactFlow
@@ -58,7 +75,14 @@ function Canvas({ nodes, edges, setNodes, setEdges, nodeTypes, onNodesChange, on
                 nodeTypes={nodeTypes}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                onEdgesDelete={(deletedEdges) => {
+                    deletedEdges.forEach(deleteEdge);
+                }}
                 onConnect = {onConnect}
+                onNodesDelete = {(deletedNodes) => {
+                    deletedNodes.forEach(deleteNode);
+                    console.log(deletedNodes);
+                }}
                 colorMode="dark"
             >
                 <Background />
